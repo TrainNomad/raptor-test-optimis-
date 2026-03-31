@@ -1,0 +1,17 @@
+{
+  "name": "train-router",
+  "version": "1.0.0",
+  "description": "Moteur de recherche d'itinéraires ferroviaires (RAPTOR multi-opérateurs)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --max-old-space-size=400 server.js",
+    "update": "bash scripts/update-gtfs.sh && node ingest_v2.js",
+    "ingest": "node gtfs-ingest.js && node ingest_v2.js",
+    "stations": "node ingest_v2.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

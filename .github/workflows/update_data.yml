@@ -1,0 +1,98 @@
+name: Update GTFS Data
+
+on:
+  schedule:
+    # Tous les jours à 3h00 UTC
+    - cron: '0 3 * * *'
+  # Permet de déclencher manuellement depuis l'onglet Actions
+  workflow_dispatch:
+
+jobs:
+  update-gtfs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # On a besoin de l'historique complet pour pouvoir push sur deploy
+          fetch-depth: 0
+
+      # ── 2. Node.js ───────────────────────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --omit=dev
+
+      # ── 3. Outils système ─────────────────────────────────────────────────────
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y unzip curl
+
+      # ── 4. Téléchargement + ingestion GTFS ───────────────────────────────────
+      - name: Download & ingest GTFS feeds
+        env:
+          TRANSITLAND_API_KEY: ${{ secrets.TRANSITLAND_API_KEY }}
+          NAP_API_KEY: ${{ secrets.NAP_API_KEY }}
+          # Node.js limité à 3 GB sur le runner GitHub (7 GB dispo)
+          NODE_OPTIONS: "--max-old-space-size=3072"
+        run: bash scripts/update-gtfs.sh
+
+      # ── 5. Prétraitement station-based (ingest_v2) ────────────────────────────
+      - name: Build station index (ingest_v2)
+        env:
+          NODE_OPTIONS: "--max-old-space-size=3072"
+        run: node ingest_v2.js
+
+      # ── 6. Vérification que engine_data est non vide ─────────────────────────
+      - name: Verify engine_data
+        run: |
+          echo "=== Contenu engine_data/ ==="
+          ls -lh engine_data/
+          # Vérification minimale : les fichiers critiques doivent exister
+          for f in stops.json route_trips.json transfer_index.json stations.bin stop_to_station.json; do
+            if [ ! -f "engine_data/$f" ]; then
+              echo "❌  Fichier manquant : engine_data/$f"
+              exit 1
+            fi
+          done
+          echo "✅  Tous les fichiers critiques présents"
+          echo "=== Tailles ==="
+          du -sh engine_data/*.json engine_data/*.bin 2>/dev/null | sort -h
+
+      # ── 7. Push sur la branche deploy ────────────────────────────────────────
+      # Render surveille cette branche et redéploie automatiquement à chaque push.
+      # On ne pousse que le dossier engine_data (pas les GTFS bruts ~500 MB).
+      - name: Configure git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push engine_data to deploy branch
+        run: |
+          # Récupérer ou créer la branche deploy
+          git fetch origin deploy 2>/dev/null || true
+          git checkout -B deploy origin/deploy 2>/dev/null || git checkout -B deploy
+
+          # Rebase sur main pour garder le code source à jour
+          git merge origin/main --no-edit --strategy-option=ours
+
+          # Forcer l'inclusion de engine_data (normalement dans .gitignore)
+          git add -f engine_data/
+
+          # Ne committer que si quelque chose a changé
+          if git diff --staged --quiet; then
+            echo "ℹ️  Aucun changement dans engine_data — pas de push"
+          else
+            DATESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+            git commit -m "chore: update engine_data [${DATESTAMP}]"
+            git push origin deploy --force-with-lease
+            echo "✅  engine_data poussé sur la branche deploy"
+          fi
