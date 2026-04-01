@@ -43,7 +43,7 @@ jobs:
           NAP_API_KEY: ${{ secrets.NAP_API_KEY }}
           # Node.js limité à 3 GB sur le runner GitHub (7 GB dispo)
           NODE_OPTIONS: "--max-old-space-size=3072"
-        run: bash scripts/update-gtfs.sh
+        run: bash update-gtfs.sh
 
       # ── 5. Prétraitement station-based (ingest_v2) ────────────────────────────
       - name: Build station index (ingest_v2)
