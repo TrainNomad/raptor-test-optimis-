@@ -30,7 +30,13 @@ curl -k -L \
   "https://transit.land/api/v2/rest/feeds/f-uk~rail/download_latest_feed_version?apikey=${TRANSITLAND_API_KEY}" \
   -o /tmp/gtfs_uk_full.zip
 
-unzip -o /tmp/gtfs_uk_full.zip -d ./gtfs/UK_Rail > /dev/null
+if ! unzip -o /tmp/gtfs_uk_full.zip -d ./gtfs/UK_Rail > /dev/null 2>&1; then
+  echo "⚠️  UK Rail ignoré — ZIP invalide (clé API invalide ?)"
+else
+  echo "⚙️  Filtrage Avanti West Coast (VT)..."
+  node filter_avanti.js
+fi
+
 
 echo "⚙️  Filtrage Avanti West Coast (VT)..."
 node filter_avanti.js
