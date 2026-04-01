@@ -1,0 +1,138 @@
+[
+  {
+    "id": "SNCF",
+    "name": "SNCF",
+    "gtfs_dir": "./gtfs/sncf",
+    "gtfs_url": "https://eu.ftp.opendatasoft.com/sncf/plandata/Export_OpenData_SNCF_GTFS_NewTripId.zip"
+  },
+  {
+    "id": "ES",
+    "name": "Eurostar",
+    "gtfs_dir": "./gtfs/eurostar",
+    "gtfs_url": "https://integration-storage.dm.eurostar.com/gtfs-prod/gtfs_static_commercial_v2.zip"
+  },
+  {
+    "id": "TI",
+    "name": "Trenitalia France",
+    "gtfs_dir": "./gtfs/trenitalia",
+    "gtfs_url": "https://thello.axelor.com/public/gtfs/gtfs.zip"
+  },
+  {
+  "id": "TI_AV",
+  "gtfs_url": "https://github.com/TrainNomad/trenitalia_gtfs/releases/download/latest/gtfs.zip",
+  "gtfs_dir": "./gtfs/trenitalia_it_api"
+},
+  {
+    "id": "EU_SLEEPER",
+    "name": "European Sleeper (Amsterdam · Bruxelles · Berlin · Prague · Vienne)",
+    "gtfs_dir": "./gtfs/eu_sleeper",
+    "gtfs_url": "https://jbb.ghsq.de/gtfs/eu-es.gtfs.zip",
+    "note": "Feed GTFS non-officiel European Sleeper — train de nuit Amsterdam/Bruxelles → Berlin → Prague/Vienne. Maintenu par la communauté (jbb.ghsq.de). Mis à jour manuellement."
+  },
+  {
+    "id": "SNCB",
+    "name": "SNCB Belgique",
+    "gtfs_dir": "./gtfs/sncb",
+    "gtfs_url": "https://api-management-discovery-production.azure-api.net/api/gtfs/feed/nmbssncb/static"
+  },
+
+  {
+    "id": "RENFE",
+    "name": "Renfe (AVE · Larga Distancia · Media Distancia)",
+    "gtfs_dir": "./gtfs/renfe",
+    "gtfs_url": "https://ssl.renfe.com/gtransit/Fichero_AV_LD/google_transit.zip",
+    "gtfs_nap_id": "897",
+    "note": "Feed officiel Renfe — couvre AVE (haute vitesse), Larga Distancia et Media Distancia (regionaux). Mis a jour quotidiennement. URL directe publique, pas besoin de cle API. Fallback : NAP ID 897 via nap.transportes.gob.es"
+  },
+  {
+    "id": "OUIGO_ES",
+    "name": "OUIGO Espana",
+    "gtfs_dir": "./gtfs/ouigo_es",
+    "gtfs_nap_id": "1766",
+    "note": "Telechargement via API NAP (cle requise) — voir script download_spain_gtfs.js"
+  },
+  {
+    "id": "CP",
+    "name": "CP Portugal (Alfa Pendular · Intercidades · Inter-regional)",
+    "gtfs_dir": "./gtfs/cp",
+    "gtfs_url": "https://publico.cp.pt/gtfs/gtfs.zip",
+    "note": "Feed officiel CP — couvre AP (Alfa Pendular, grande vitesse), IC (Intercidades) et IR (Inter-regional). URL directe publique, pas besoin de cle API. Mis a jour regulierement par CP."
+  },
+  {
+    "id": "DB_FV",
+    "name": "Allemagne Longue Distance (ICE · IC · EC · NJ)",
+    "gtfs_dir": "./gtfs/db_fv_filtered",
+    "gtfs_download_dir": "./gtfs/db_fv",
+    "gtfs_url": "https://download.gtfs.de/germany/fv_free/latest.zip",
+    "note": "Fernverkehr DB — ICE (grande vitesse), IC (Intercity), EC (EuroCity intercontinental), NJ (Nightjet, trains de nuit). Couvre tout le réseau grande vitesse allemand + liaisons Austria/Suisse/NL/BE/FR/DK. Source : gtfs.de (données DELFI/DB officiel, mises à jour quotidiennement). Filtré via filter_germany.js.",
+    "agencies_in_feed": [
+      {
+        "agency_id": "4",
+        "agency_name": "DB Fernverkehr AG"
+      },
+      {
+        "agency_id": "5",
+        "agency_name": "DB Fernverkehr (Codesharing)"
+      },
+      {
+        "agency_id": "6",
+        "agency_name": "SÜWEX"
+      },
+      {
+        "agency_id": "1",
+        "agency_name": "HZZP"
+      },
+      {
+        "agency_id": "2",
+        "agency_name": "Dänische Staatsbahnen (DSB)"
+      },
+      {
+        "agency_id": "3",
+        "agency_name": "MÁV (Hongrie)"
+      },
+      {
+        "agency_id": "7",
+        "agency_name": "SNCF (codeshare DB)"
+      },
+      {
+        "agency_id": "8",
+        "agency_name": "Nederlandse Spoorwegen (NS)"
+      },
+      {
+        "agency_id": "9",
+        "agency_name": "ZSSK (Slovaquie)"
+      },
+      {
+        "agency_id": "10",
+        "agency_name": "SBB (Suisse)"
+      },
+      {
+        "agency_id": "11",
+        "agency_name": "ÖBB (Autriche)"
+      },
+      {
+        "agency_id": "12",
+        "agency_name": "PKP Intercity (Pologne)"
+      },
+      {
+        "agency_id": "13",
+        "agency_name": "České dráhy (Tchéquie)"
+      }
+    ],
+    "train_types": [
+      "ICE",
+      "IC_DB",
+      "EC",
+      "NIGHTJET",
+      "RJ",
+      "EN",
+      "FLIXTRAIN",
+      "TRAIN_DB"
+    ]
+  },
+  {
+    "id": "UK",
+    "name": "UK National (Avanti · LNER · ScotRail · CrossCountry · GWR · EMR · Northern · TfW · Lumo…)",
+    "gtfs_dir": "./gtfs/UK_National"
+  }
+]
