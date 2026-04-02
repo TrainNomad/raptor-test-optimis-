@@ -142,6 +142,7 @@ function downloadNAP(op) {
     process.exit(1);
   }
 })();
+ENDNODE
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PARTIE 2b — Trenitalia Italia AV+IC (raw GitHub)
