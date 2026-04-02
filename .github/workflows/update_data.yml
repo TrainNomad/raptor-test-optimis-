@@ -49,7 +49,7 @@ jobs:
       - name: Build station index (ingest_v2)
         env:
           NODE_OPTIONS: "--max-old-space-size=3072"
-        run: node ingest_v2.js
+        run: node ingest_v2.cjs
 
       # ── 6. Vérification que engine_data est non vide ─────────────────────────
       - name: Verify engine_data
