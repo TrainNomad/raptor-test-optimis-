@@ -104,25 +104,44 @@ function downloadNAP(op) {
 
 // ─── Boucle principale ────────────────────────────────────────────────────────
 (async function() {
-  // Ignorer UK (Partie 1), DB_FV (Partie 3), NL (Partie 5) et TI_AV (Partie 2b — unzip spécial)
-  const filtered = ops.filter(op => op.id !== 'UK' && op.id !== 'AVANTI' && op.id !== 'DB_FV' && op.id !== 'DB_RV' && op.id !== 'NL' && op.id !== 'TI_AV');
+  try {
+    // Filtrage des opérateurs déjà gérés par d'autres sections du script shell
+    // On ignore UK, Avanti, DB, NL et TI_AV car ils ont leurs propres étapes dédiées
+    const filtered = ops.filter(op => 
+      op.id !== 'UK' && 
+      op.id !== 'AVANTI' && 
+      op.id !== 'DB_FV' && 
+      op.id !== 'DB_RV' && 
+      op.id !== 'NL' && 
+      op.id !== 'TI_AV'
+    );
 
-  for (const op of filtered) {
-    try {
-      if (op.gtfs_url) {
-        downloadDirect(op);
-      } else if (op.gtfs_nap_id) {
-        await downloadNAP(op);
-      } else {
-        console.log('  SKIP ' + op.id + ' : aucune source configurée.');
+    console.log(`🚀 Démarrage du téléchargement pour ${filtered.length} opérateurs...`);
+
+    for (const op of filtered) {
+      try {
+        if (op.gtfs_url) {
+          // Téléchargement direct (synchrone via execSync dans votre script)
+          downloadDirect(op);
+        } else if (op.gtfs_nap_id) {
+          // Téléchargement via l'API NAP espagnole (asynchrone)
+          await downloadNAP(op);
+        } else {
+          console.log(`  ⏭️  SKIP ${op.id} : aucune source (URL ou NAP ID) configurée.`);
+        }
+      } catch (err) {
+        // En cas d'échec sur un opérateur, on affiche l'erreur et on arrête tout le processus
+        console.error(`  ❌ ERREUR critique sur l'opérateur ${op.id} : ${err.message}`);
+        process.exit(1);
       }
-    } catch(err) {
-      console.error('  ERREUR ' + op.id + ' : ' + err.message);
-      process.exit(1);
     }
+    
+    console.log('✅ Tous les téléchargements de la boucle principale sont terminés.');
+  } catch (globalErr) {
+    console.error(`  ❌ ERREUR fatale dans la boucle principale : ${globalErr.message}`);
+    process.exit(1);
   }
 })();
-ENDNODE
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PARTIE 2b — Trenitalia Italia AV+IC (raw GitHub)
