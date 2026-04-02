@@ -32,21 +32,18 @@ curl -k -L \
 
 if ! unzip -o /tmp/gtfs_uk_full.zip -d ./gtfs/UK_Rail > /dev/null 2>&1; then
   echo "⚠️  UK Rail ignoré — ZIP invalide (clé API invalide ?)"
+  mkdir -p ./gtfs/UK_National
 else
   echo "⚙️  Filtrage Avanti West Coast (VT)..."
-  node filter_avanti.js
+  node filter_avanti.js || echo "⚠️  filter_avanti.js ignoré — données UK Rail absentes"
 fi
-
-
-echo "⚙️  Filtrage Avanti West Coast (VT)..."
-node filter_avanti.js
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PARTIE 2 — Autres opérateurs (SNCF, Eurostar, Renfe…) via Node
 # ─────────────────────────────────────────────────────────────────────────────
 echo "📥 Téléchargement des autres GTFS..."
 
-node << 'ENDNODE'
+node --input-type=commonjs << 'ENDNODE'
 const https        = require('https');
 const fs           = require('fs');
 const { execSync } = require('child_process');
@@ -109,8 +106,6 @@ function downloadNAP(op) {
 (async function() {
   // Ignorer UK (Partie 1), DB_FV (Partie 3), NL (Partie 5) et TI_AV (Partie 2b — unzip spécial)
   const filtered = ops.filter(op => op.id !== 'UK' && op.id !== 'AVANTI' && op.id !== 'DB_FV' && op.id !== 'DB_RV' && op.id !== 'NL' && op.id !== 'TI_AV');
-  // EU_SLEEPER est inclus dans filtered : téléchargé via gtfs_url directe automatiquement
-  // NL est exclu ici : téléchargement + filtrage séparé (Partie 5)
 
   for (const op of filtered) {
     try {
@@ -140,7 +135,7 @@ echo "📥 Téléchargement Trenitalia Italia AV+IC (GitHub raw)..."
 mkdir -p ./gtfs/trenitalia_it_api
 
 # Lire l'URL depuis operators.json (source unique de vérité)
-TI_AV_URL=$(node -e "const ops=require('./operators.json'); const op=ops.find(o=>o.id==='TI_AV'); console.log(op ? op.gtfs_url : '');")
+TI_AV_URL=$(node --input-type=commonjs -e "const ops=require('./operators.json'); const op=ops.find(o=>o.id==='TI_AV'); console.log(op ? op.gtfs_url : '');")
 TI_AV_ZIP="/tmp/gtfs_ti_av.zip"
 
 echo "  URL : $TI_AV_URL"
@@ -150,8 +145,6 @@ if [ -z "$TI_AV_URL" ]; then
 else
   set +e  # section non-bloquante — une erreur ici ne stoppe pas le deploy
 
-  # -L : suit les redirects GitHub → raw.githubusercontent.com
-  # -w : capture le code HTTP dans HTTP_CODE, le corps dans le fichier
   HTTP_CODE=$(curl -L -s -w "%{http_code}" -o "$TI_AV_ZIP" "$TI_AV_URL")
 
   if [ "$HTTP_CODE" != "200" ]; then
@@ -162,13 +155,10 @@ else
     echo "      HTTP_CODE=$HTTP_CODE — contenu reçu :"
     head -c 300 "$TI_AV_ZIP" | cat
   else
-    # Le ZIP contient les fichiers GTFS à la racine (agency.txt, routes.txt…)
-    # → on extrait directement dans ./gtfs/trenitalia_it_api/
     unzip -o "$TI_AV_ZIP" -d ./gtfs/trenitalia_it_api > /dev/null
     echo "  ✅ TI_AV extrait dans ./gtfs/trenitalia_it_api/"
     echo "     Fichiers : $(ls ./gtfs/trenitalia_it_api/*.txt 2>/dev/null | wc -l) .txt"
     echo "     Contenu  : $(ls ./gtfs/trenitalia_it_api/*.txt 2>/dev/null | xargs -I{} basename {} | tr '\n' ' ')"
-    # Vérification rapide : stops.txt présent et non vide ?
     if [ -f ./gtfs/trenitalia_it_api/stops.txt ]; then
       echo "     stops.txt : $(wc -l < ./gtfs/trenitalia_it_api/stops.txt) lignes"
       echo "     Exemple   : $(head -2 ./gtfs/trenitalia_it_api/stops.txt | tail -1 | cut -c1-80)"
@@ -193,19 +183,6 @@ unzip -o /tmp/gtfs_db_fv.zip -d ./gtfs/db_fv > /dev/null
 
 echo "⚙️  Filtrage Allemagne FV (exclusion non-ferroviaire)..."
 node filter_germany.js
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  PARTIE 5 — Pays-Bas (openOV — NS · Arriva · Blauwnet · Eurobahn · VIAS)
-# ─────────────────────────────────────────────────────────────────────────────
-# echo "📥 Téléchargement Pays-Bas openOV (NS · Arriva · Blauwnet · Eurobahn · VIAS)..."
-# mkdir -p ./gtfs/nl_full
-# curl -L -s \
-#   "https://gtfs.ovapi.nl/nl/gtfs-openov-nl.zip" \
-#   -o /tmp/gtfs_nl_full.zip
-# unzip -o /tmp/gtfs_nl_full.zip -d ./gtfs/nl_full > /dev/null
-
-# echo "⚙️  Filtrage NL (trains uniquement — exclusion bus/tram/métro/ferry/doublons)..."
-# node filter_netherlands.js
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  PARTIE 4 — Ingestion RAPTOR + index stations
