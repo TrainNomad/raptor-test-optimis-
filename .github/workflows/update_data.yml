@@ -1,5 +1,6 @@
 name: Update GTFS Data
 
+
 permissions:
   contents: write  # Autorise le bot à faire des push
 

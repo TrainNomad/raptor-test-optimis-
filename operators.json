@@ -19,7 +19,7 @@
   },
   {
   "id": "TI_AV",
-  "gtfs_url": "https://github.com/TrainNomad/trenitalia_gtfs/releases/download/latest/gtfs.zip",
+  "gtfs_url": "https://github.com/TrainNomad/trenitalia_gtfs/raw/main/ITALIE/gtfs/trenitalia_it_api/gtfs.zip",
   "gtfs_dir": "./gtfs/trenitalia_it_api"
 },
   {
