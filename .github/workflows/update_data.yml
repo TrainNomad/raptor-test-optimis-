@@ -1,11 +1,15 @@
 name: Update GTFS Data
 
+permissions:
+  contents: write  # Autorise le bot à faire des push
+
 on:
   schedule:
     # Tous les jours à 3h00 UTC
     - cron: '0 3 * * *'
   # Permet de déclencher manuellement depuis l'onglet Actions
   workflow_dispatch:
+
 
 jobs:
   update-gtfs:
